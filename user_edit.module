@@ -1,0 +1,153 @@
+<?php
+
+/*
+ * Implements hook_menu()
+ */
+function user_edit_menu(){
+//  $items['user/%/edit_1'] = array(
+//    'title' => 'Edit',
+//    'description' => t('User Edit page'),
+//    'access callback' => TRUE,
+//  );
+
+  $path = drupal_get_path('module', 'user');
+  $items['user/%user/edit/profile_settings'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Profile Settings',
+    'weight' => 1,
+  );
+  // Now add the rest of the tab entries.
+  $items['user/%user/edit/information'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Information',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_edit_information_form',1),
+    'access callback' => 'user_edit_access',
+    'access arguments' => array(1),
+    'weight' => 2,
+    'file path' => $path,
+    'file' => 'user.pages.inc',
+  );
+
+  return $items;
+}
+
+/*
+ * Implements hook_forms()
+ */
+
+function user_edit_forms($form_id, $args){
+  $forms['user_edit_information_form'] = array(
+    'callback' => 'user_profile_form',
+  );
+  $forms['user_edit_profile_settings_form'] = array(
+    'callback' => 'user_profile_form',
+  );
+  return $forms;
+}
+
+/*
+ * Implements user_edit_profile_form
+ */
+function user_edit_profile_form($form, &$form_state, $user_entity=NULL){
+//  dsm($args, 'args');
+  $form = array();
+
+  if(isset($user_entity)){
+    $username = $user_entity->name;
+    $name = $user_entity->field_name;
+    $surname = $user_entity->field_surname;
+    $email = $user_entity->field_email;
+    $about_me = $user_entity->field_about_me;
+    $birthday = $user_entity->field_birthday;
+  }
+
+
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#default_value' => $username,
+  );
+
+  $form['pass'] = array(
+    '#type' => 'password_confirm',
+  );
+
+  $form['field_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#default_value' => $name,
+  );
+
+  $form['field_surname'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Surname'),
+    '#default_value' => $surname,
+  );
+
+  $form['field_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#default_value' => $email,
+  );
+
+  $form['field_about_me'] = array(
+    '#type' => 'textarea',
+    '#title' => t('About Me'),
+    '#default_value' => $about_me,
+  );
+
+  $form['field_birthday'] = array(
+    '#type' => 'date',
+    '#title' => t('Birthday'),
+//    '#default_value' => $birthday,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('user_profile_form_submit'),
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/*
+ * Implements hook_form_alter()
+ */
+function user_edit_form_alter(&$form, &$form_state, $form_id) {
+//  dsm($form_id, 'form id');
+  if($form_id == 'user_edit_information_form'){
+    $form['account']['#access']=FALSE;
+    $form['picture']['#access']=FALSE;
+    $form['overlay_control']['#access']=FALSE;
+    $form['timezone']['#access']=FALSE;
+  }
+
+  if($form_id == 'user_edit_profile_settings_form'){
+    $form['field_name']['#access']=FALSE;
+    $form['field_surname']['#access']=FALSE;
+    $form['field_email']['#access']=FALSE;
+    $form['field_about_me']['#access']=FALSE;
+    $form['field_birthday']['#access']=FALSE;
+    $form['picture']['#access']=FALSE;
+    $form['overlay_control']['#access']=FALSE;
+    $form['timezone']['#access']=FALSE;
+    $form['account']['status']['#access']=FALSE;
+    $form['account']['roles']['#access']=FALSE;
+    $form['account']['notify']['#access']=FALSE;
+  }
+}
+
+/*
+ * Implements hook_menu_alter()
+ */
+function user_edit_menu_alter(&$items){
+
+  $items['user/%user/edit'] = array_merge($items['user/%user/edit'], array(
+    'title' => 'Profile Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_edit_profile_settings_form', 1),
+  ));
+  $items['user/%user_category/edit/account']['access callback'] = FALSE;
+}

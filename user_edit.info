@@ -1,0 +1,4 @@
+name = User Edit Page
+description = Tabs to split user edit page.
+package = core
+core = 7.x
